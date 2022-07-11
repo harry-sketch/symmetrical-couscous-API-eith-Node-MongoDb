@@ -32,7 +32,6 @@ app.put("/:name", async (req, res) => {
 });
 
 // delete Data
-
 app.delete("/:id", async (req, res) => {
   const data = await getDatabase();
   const results = await data.deleteOne({
