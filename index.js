@@ -1,43 +1,68 @@
-const express = require("express");
-const port = 5000;
-const getDatabase = require("./Config/config");
-const mongodb = require("mongodb");
+const mongoose = require("mongoose");
+mongoose.connect("mongodb://localhost:27017/shop");
 
-const app = express();
-app.use(express.json());
-
-// Read Data
-app.get("/", async (req, res) => {
-  const data = await getDatabase();
-  const result = await data.find().toArray();
-  res.status(200).send(result);
+const ListSchema = new mongoose.Schema({
+  name: String,
+  category: String,
+  model: String,
+  price: Number,
 });
 
-//Insert Data
-app.post("/", async (req, res) => {
-  const data = await getDatabase();
-  const results = await data.insertOne(req.body);
-  res.send(results);
-});
+// Insert data
+const insertData = async () => {
+  const ListModel = mongoose.model("lists", ListSchema);
+  const data = await ListModel.insertMany([
+    { name: "Vivo", category: "mobile", model: "V5", price: 500 },
+    { name: "Apple", category: "mobile", model: "12", price: 800 },
+  ]);
+
+  console.log(data);
+};
+
+insertData();
+
+// Read data
+const readData = async () => {
+  const data = mongoose.model("lists", ListSchema);
+  const res = await data.find();
+  console.log(res);
+};
+readData();
+
+// Insert One data
+const insertOneData = async () => {
+  const ListModel = mongoose.model("lists", ListSchema);
+  const data = new ListModel({
+    name: "Samsung",
+    category: "mobile",
+    model: "S22",
+    price: 1200,
+  });
+
+  const res = await data.save();
+  console.log(res);
+};
+
+insertOneData();
 
 // Update Data
-app.put("/:name", async (req, res) => {
-  console.log(req.params.name);
-  const data = await getDatabase();
-  const results = await data.updateOne(
-    { name: req.params.name },
-    { $set: req.body }
+
+const updateData = async () => {
+  const data = mongoose.model("lists", ListSchema);
+  const res = await data.updateOne(
+    { name: "Samsung" },
+    { $set: { price: 1000 } }
   );
-  res.send(results);
-});
+  console.log(res);
+};
 
-// delete Data
-app.delete("/:id", async (req, res) => {
-  const data = await getDatabase();
-  const results = await data.deleteOne({
-    _id: new mongodb.ObjectId(req.params.id),
-  });
-  res.send(results);
-});
+updateData();
 
-app.listen(port);
+// Delete Data
+const deleteData = async () => {
+  const data = mongoose.model("lists", ListSchema);
+  const res = await data.deleteOne({ name: "Vivo" });
+  console.log(res);
+};
+
+deleteData();
